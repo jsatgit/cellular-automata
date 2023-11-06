@@ -76,13 +76,14 @@ form.addEventListener("submit", event => {
 
 
 const searchParams = new URLSearchParams(window.location.search);
-const ruleNumber = parseInt(searchParams.get("rule"));
+const ruleNumber = searchParams.get("rule");
 const initialState = searchParams.get("initialState");
-const gridHeight = parseInt(searchParams.get("height"));
-const cellSize = parseInt(searchParams.get("cellSize"));
+const gridHeight = searchParams.get("height");
+const cellSize = searchParams.get("cellSize");
 
 if (ruleNumber) {
-    ruleInput.value = ruleNumber.toString();
+    console.log(ruleNumber)
+    ruleInput.value = ruleNumber;
 }
 
 if (initialState) {
@@ -90,11 +91,11 @@ if (initialState) {
 }
 
 if (gridHeight) {
-    gridHeightInput.value = gridHeight.toString();
+    gridHeightInput.value = gridHeight;
 }
 
 if (cellSize) {
-    cellSizeInput.value = cellSize.toString();
+    cellSizeInput.value = cellSize;
 }
 
-renderRule(ruleNumber, initialState, gridHeight, cellSize);
+renderRule(parseInt(ruleNumber), initialState, parseInt(gridHeight), parseInt(cellSize));
