@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="automata.css">
+    </head>
+    <body>
+        <form id="form" method="get">
+            Rule <input id="rule" type="number" min="0" max="255" value="250"/>
+            Initial State <input id="initialState" size="60" type="text" minlength="3" maxlength="1000" value="000000000000000000000000000010000000000000000000000000000"/>
+            Levels <input id="gridHeight" type="number" min="2" max="1000" value="50"/>
+            Cell size <input id="cellSize" type="number" min="1" max="20" value="10"/>
+            <input type="submit" value="Generate">
+        </form>
+        <canvas id="canvas"></canvas>
+        <script src="automata.js"></script>
+    </body>
+</html>
