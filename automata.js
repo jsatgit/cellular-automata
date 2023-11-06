@@ -5,7 +5,6 @@ const neighbors = 3
 const colorChoices = ["white", "black", "grey", "red", "green", "blue"]
 const EMPTY = "0"
 let isPlaying = false
-let playDelay = 500;
 
 rules = new Map();
 
@@ -62,6 +61,7 @@ const numColorsInput = document.getElementById("numColors");
 
 const playButton = document.getElementById("play");
 const pauseButton = document.getElementById("pause");
+const playDelayInput = document.getElementById("playDelay");
 
 
 pauseButton.addEventListener("click", () => {
@@ -69,6 +69,7 @@ pauseButton.addEventListener("click", () => {
 })
 
 playButton.addEventListener("click", () => {
+    console.log("clicked play button")
     isPlaying = true;
 })
 
@@ -77,12 +78,14 @@ fitCanvasToWindow();
 form.addEventListener("submit", event => {
     // don't refresh the page
     event.preventDefault();
+    console.log("isplaying", isPlaying)
 
-    const ruleNumber = parseInt(ruleInput.value);
+    const ruleNumber = ruleInput.value;
     const initialState = initialStateInput.value;
-    const gridHeight = parseInt(gridHeightInput.value);
-    const cellSize = parseInt(cellSizeInput.value);
-    const numColors = parseInt(numColorsInput.value);
+    const gridHeight = gridHeightInput.value;
+    const cellSize = cellSizeInput.value;
+    const numColors = numColorsInput.value;
+    const playDelayParam = playDelayInput.value;
 
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("rule", ruleNumber);
@@ -91,6 +94,7 @@ form.addEventListener("submit", event => {
     searchParams.set("cellSize", cellSize);
     searchParams.set("numColors", numColors);
     searchParams.set("isPlaying", isPlaying ? "1" : "0");
+    searchParams.set("playDelay", playDelayParam)
     window.location.search = searchParams.toString();
 })
 
@@ -103,7 +107,6 @@ function updateRule(newRule) {
 ruleInput.addEventListener("change", event => {
     updateRule(event.target.value)
 })
-
 
 
 const searchParams = new URLSearchParams(window.location.search);
@@ -140,7 +143,7 @@ if (isPlayingParam) {
 }
 
 if (playDelayParam) {
-    playDelay = parseInt(playDelayParam)
+    playDelayInput.value = playDelayParam
 }
 
 if (isPlaying) {
@@ -148,7 +151,7 @@ if (isPlaying) {
         if (isPlaying) {
             updateRule(parseInt(ruleInput.value) + 1)
         }
-    }, playDelay)
+    }, parseInt(playDelayInput.value))
 }
 
 
