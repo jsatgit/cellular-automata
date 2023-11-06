@@ -4,6 +4,8 @@ const ctx = canvas.getContext("2d");
 const neighbors = 3
 const colorChoices = ["white", "black", "grey", "red", "green", "blue"]
 const EMPTY = "0"
+let isPlaying = false
+let playDelay = 500;
 
 rules = new Map();
 
@@ -58,6 +60,18 @@ const gridHeightInput = document.getElementById("gridHeight");
 const cellSizeInput = document.getElementById("cellSize");
 const numColorsInput = document.getElementById("numColors");
 
+const playButton = document.getElementById("play");
+const pauseButton = document.getElementById("pause");
+
+
+pauseButton.addEventListener("click", () => {
+    isPlaying = false;
+})
+
+playButton.addEventListener("click", () => {
+    isPlaying = true;
+})
+
 fitCanvasToWindow();
 
 form.addEventListener("submit", event => {
@@ -76,16 +90,20 @@ form.addEventListener("submit", event => {
     searchParams.set("height", gridHeight);
     searchParams.set("cellSize", cellSize);
     searchParams.set("numColors", numColors);
+    searchParams.set("isPlaying", isPlaying ? "1" : "0");
     window.location.search = searchParams.toString();
 })
+
+function updateRule(newRule) {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("rule", newRule);
+    window.location.search = searchParams.toString();
+}
 
 ruleInput.addEventListener("change", event => {
-    const ruleNumber = parseInt(event.target.value);
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("rule", ruleNumber);
-    window.location.search = searchParams.toString();
-
+    updateRule(event.target.value)
 })
+
 
 
 const searchParams = new URLSearchParams(window.location.search);
@@ -94,6 +112,8 @@ const initialState = searchParams.get("initialState");
 const gridHeight = searchParams.get("height");
 const cellSize = searchParams.get("cellSize");
 const numColors = searchParams.get("numColors");
+const isPlayingParam = searchParams.get("isPlaying");
+const playDelayParam = searchParams.get("playDelay");
 
 if (ruleNumber) {
     ruleInput.value = ruleNumber;
@@ -114,6 +134,23 @@ if (cellSize) {
 if (numColors) {
     numColorsInput.value = numColors
 }
+
+if (isPlayingParam) {
+    isPlaying = isPlayingParam === "1" ? true : false
+}
+
+if (playDelayParam) {
+    playDelay = parseInt(playDelayParam)
+}
+
+if (isPlaying) {
+    setTimeout(() => {
+        if (isPlaying) {
+            updateRule(parseInt(ruleInput.value) + 1)
+        }
+    }, playDelay)
+}
+
 
 const numColorsInputValue = parseInt(numColorsInput.value);
 ruleInput.setAttribute("max", numColorsInputValue ** (numColorsInputValue ** neighbors) - 1)
