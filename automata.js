@@ -6,18 +6,22 @@ const colors = 2
 const EMPTY = "0"
 const FILLED = "1"
 const FILLED_COLOR = "black"
-const numberOfInputs = colors ** neighbors;
-const maxIndex = numberOfInputs - 1;
 
-function generateRules() {
-    const numberOfRules = colors ** numberOfInputs;
-    return [...Array(numberOfRules).keys()].map(num => num.toString(colors).padStart(numberOfInputs, EMPTY));
+rules = new Map();
+
+function getRule(ruleNum) {
+    const numberOfInputs = colors ** neighbors;
+    if (!rules.has(ruleNum)) {
+        rules.set(ruleNum, ruleNum.toString(colors).padStart(numberOfInputs, EMPTY));
+    }
+
+    return rules.get(ruleNum);
 }
 
-rules = generateRules();
-
-function evaluate(rule, pattern) {
-    return rules[rule][maxIndex - parseInt(pattern, colors)];
+function evaluate(ruleNum, pattern) {
+    const rule = getRule(ruleNum);
+    const maxIndex = rule.length - 1;
+    return rule[maxIndex - parseInt(pattern, colors)];
 }
 
 function renderRow(row, columnNum, cellSize) {
@@ -29,7 +33,7 @@ function renderRow(row, columnNum, cellSize) {
     }
 }
 
-function renderRule(rule, initialRow, depth, cellSize) {
+function renderRule(ruleNum, initialRow, depth, cellSize) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     let row = initialRow;
     for (let level = 0; level < depth; ++level) {
@@ -37,7 +41,7 @@ function renderRule(rule, initialRow, depth, cellSize) {
         let nextRow = EMPTY 
         for (let i = 0; i < row.length - neighbors + 1; ++i) {
             const pattern = row.slice(i, i + neighbors)
-            nextRow += evaluate(rule, pattern)
+            nextRow += evaluate(ruleNum, pattern)
         }
         nextRow += EMPTY;
         row = nextRow
@@ -82,7 +86,6 @@ const gridHeight = searchParams.get("height");
 const cellSize = searchParams.get("cellSize");
 
 if (ruleNumber) {
-    console.log(ruleNumber)
     ruleInput.value = ruleNumber;
 }
 
