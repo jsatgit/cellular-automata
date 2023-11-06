@@ -2,38 +2,36 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 const neighbors = 3
-const colors = 2
+const colorChoices = ["white", "black", "grey", "red", "green", "blue"]
 const EMPTY = "0"
-const FILLED = "1"
-const FILLED_COLOR = "black"
 
 rules = new Map();
 
-function getRule(ruleNum) {
-    const numberOfInputs = colors ** neighbors;
+function getRule(ruleNum, numColors) {
+    const numberOfInputs = numColors ** neighbors;
     if (!rules.has(ruleNum)) {
-        rules.set(ruleNum, ruleNum.toString(colors).padStart(numberOfInputs, EMPTY));
+        rules.set(ruleNum, ruleNum.toString(numColors).padStart(numberOfInputs, EMPTY));
     }
 
     return rules.get(ruleNum);
 }
 
-function evaluate(ruleNum, pattern) {
-    const rule = getRule(ruleNum);
+function evaluate(ruleNum, pattern, numColors) {
+    const rule = getRule(ruleNum, numColors);
     const maxIndex = rule.length - 1;
-    return rule[maxIndex - parseInt(pattern, colors)];
+    return rule[maxIndex - parseInt(pattern, numColors)];
 }
 
 function renderRow(row, columnNum, cellSize) {
-    ctx.fillStyle = FILLED_COLOR;
     for(let i = 0; i < row.length; ++i) {
-        if (row[i] === FILLED) {
+        if (row[i] !== EMPTY) {
+            ctx.fillStyle = colorChoices[Number(row[i])];
             ctx.fillRect(cellSize * i, columnNum * cellSize, cellSize, cellSize);
         }
     }
 }
 
-function renderRule(ruleNum, initialRow, depth, cellSize) {
+function renderRule(ruleNum, initialRow, depth, cellSize, numColors) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     let row = initialRow;
     for (let level = 0; level < depth; ++level) {
@@ -41,7 +39,7 @@ function renderRule(ruleNum, initialRow, depth, cellSize) {
         let nextRow = EMPTY 
         for (let i = 0; i < row.length - neighbors + 1; ++i) {
             const pattern = row.slice(i, i + neighbors)
-            nextRow += evaluate(ruleNum, pattern)
+            nextRow += evaluate(ruleNum, pattern, numColors)
         }
         nextRow += EMPTY;
         row = nextRow
@@ -58,6 +56,7 @@ const ruleInput = document.getElementById("rule");
 const initialStateInput = document.getElementById("initialState");
 const gridHeightInput = document.getElementById("gridHeight");
 const cellSizeInput = document.getElementById("cellSize");
+const numColorsInput = document.getElementById("numColors");
 
 fitCanvasToWindow();
 
@@ -69,12 +68,14 @@ form.addEventListener("submit", event => {
     const initialState = initialStateInput.value;
     const gridHeight = parseInt(gridHeightInput.value);
     const cellSize = parseInt(cellSizeInput.value);
+    const numColors = parseInt(numColorsInput.value);
 
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("rule", ruleNumber);
     searchParams.set("initialState", initialState);
     searchParams.set("height", gridHeight);
     searchParams.set("cellSize", cellSize);
+    searchParams.set("numColors", numColors);
     window.location.search = searchParams.toString();
 })
 
@@ -84,6 +85,7 @@ const ruleNumber = searchParams.get("rule");
 const initialState = searchParams.get("initialState");
 const gridHeight = searchParams.get("height");
 const cellSize = searchParams.get("cellSize");
+const numColors = searchParams.get("numColors");
 
 if (ruleNumber) {
     ruleInput.value = ruleNumber;
@@ -101,4 +103,11 @@ if (cellSize) {
     cellSizeInput.value = cellSize;
 }
 
-renderRule(parseInt(ruleNumber), initialState, parseInt(gridHeight), parseInt(cellSize));
+if (numColors) {
+    numColorsInput.value = numColors
+}
+
+const numColorsInputValue = parseInt(numColorsInput.value);
+ruleInput.setAttribute("max", numColorsInputValue ** (numColorsInputValue ** neighbors) - 1)
+
+renderRule(parseInt(ruleNumber), initialState, parseInt(gridHeight), parseInt(cellSize), parseInt(numColors));
