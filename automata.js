@@ -79,6 +79,14 @@ form.addEventListener("submit", event => {
     window.location.search = searchParams.toString();
 })
 
+ruleInput.addEventListener("change", event => {
+    const ruleNumber = parseInt(event.target.value);
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("rule", ruleNumber);
+    window.location.search = searchParams.toString();
+
+})
+
 
 const searchParams = new URLSearchParams(window.location.search);
 const ruleNumber = searchParams.get("rule");
