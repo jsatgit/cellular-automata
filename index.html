@@ -7,12 +7,12 @@
         <form id="form" method="get">
             <textarea id="inputArea">
 {
-    "rule": 250,
+    "rule": 0,
     "initialState": "000000000000000000000000000010000000000000000000000000000",
     "levels": 50,
-    "cellSize": 10,
+    "cellSize": 2,
     "numColors": 2,
-    "playDelay": 500 
+    "playDelay": 100 
 }
             </textarea>
             <div>
@@ -20,10 +20,12 @@
                 <input type="submit" value="Generate">
                 <button id="play">Play</button>
                 <button id="pause">Pause</button>
+                <button id="record">Record</button>
             </div>
              
         </form>
         <canvas id="canvas"></canvas>
+        <canvas id="recording"></canvas>
         <script src="automata.js"></script>
     </body>
 </html>

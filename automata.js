@@ -1,6 +1,9 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
+const recording = document.getElementById("recording");
+const recordingCtx = recording.getContext("2d");
+
 const neighbors = 3
 const colorChoices = ["white", "black", "grey", "red", "green", "blue"]
 const EMPTY = "0"
@@ -58,6 +61,7 @@ function renderRule(ruleNum, initialRow, depth, cellSize, numColors) {
 const form = document.getElementById("form");
 const playButton = document.getElementById("play");
 const pauseButton = document.getElementById("pause");
+const recordButton = document.getElementById("record");
 const inputArea = document.getElementById("inputArea");
 const outputArea = document.getElementById("outputArea");
 
@@ -67,21 +71,32 @@ function renderScreen() {
 
 let playId = null;
 
-pauseButton.addEventListener("click", () => {
+function pause() {
     if (playId !== null) {
         clearInterval(playId);
         playId = null;
     }
-})
+}
+
+pauseButton.addEventListener("click", pause)
+
 
 playButton.addEventListener("click", () => {
-    if (!playId) {
+    if (!playId && ruleNumber <= 255) {
+        record()
         playId = setInterval(() => {
             const parsedJson = getInputs();
             ruleNumber += 1
+
+            if (ruleNumber > 255) {
+                pause()
+                return;
+            }
+
             parsedJson["rule"] = ruleNumber
             inputArea.value = JSON.stringify(parsedJson, null, 4)
             renderScreen()
+            record()
         }, playDelay)
     }
 })
@@ -92,6 +107,33 @@ let gridHeight;
 let cellSize;
 let numColors;
 let playDelay;
+
+let widthOffset = 0
+let heightOffset = 0
+let numberOfRecordings = 0
+
+let MAX_NUM_RECORDING_ROWS = 16; 
+let MAX_NUM_RECORDING_COLS = 16; 
+let MAX_NUM_RECORDINGS = MAX_NUM_RECORDING_COLS * MAX_NUM_RECORDING_ROWS 
+
+function record() {
+    recordingCtx.drawImage(canvas, widthOffset, heightOffset);
+    widthOffset += initialState.length * cellSize
+    numberOfRecordings += 1
+
+    if (numberOfRecordings % MAX_NUM_RECORDING_COLS === 0) {
+        widthOffset = 0;
+        heightOffset += gridHeight * cellSize
+    }
+
+    if (numberOfRecordings >= MAX_NUM_RECORDINGS) {
+        widthOffset = 0
+        heightOffset = 0
+    }
+}
+
+recordButton.addEventListener("click", record)
+
 
 function getInputs() {
     try {
@@ -119,3 +161,6 @@ form.addEventListener("submit", event => {
 
 getInputs()
 renderScreen()
+
+recordingCtx.canvas.width = initialState.length * cellSize * MAX_NUM_RECORDING_COLS;
+recordingCtx.canvas.height = gridHeight * cellSize * MAX_NUM_RECORDING_ROWS;
