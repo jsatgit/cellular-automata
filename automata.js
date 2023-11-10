@@ -4,7 +4,9 @@ const ctx = canvas.getContext("2d");
 const neighbors = 3
 const colorChoices = ["white", "black", "grey", "red", "green", "blue"]
 const EMPTY = "0"
-let isPlaying = false
+
+const FIRST_ITEM = EMPTY
+const LAST_ITEM = EMPTY
 
 rules = new Map();
 
@@ -32,130 +34,88 @@ function renderRow(row, columnNum, cellSize) {
     }
 }
 
-function renderRule(ruleNum, initialRow, depth, cellSize, numColors) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    let row = initialRow;
-    for (let level = 0; level < depth; ++level) {
-        renderRow(row, level, cellSize);
-        let nextRow = EMPTY 
-        for (let i = 0; i < row.length - neighbors + 1; ++i) {
-            const pattern = row.slice(i, i + neighbors)
-            nextRow += evaluate(ruleNum, pattern, numColors)
-        }
-        nextRow += EMPTY;
-        row = nextRow
-    }
-}
-
 function setCanvasSize(width, height) {
     ctx.canvas.width  = width;
     ctx.canvas.height = height;
 }
 
-const form = document.getElementById("form");
-const ruleInput = document.getElementById("rule");
-const initialStateInput = document.getElementById("initialState");
-const gridHeightInput = document.getElementById("gridHeight");
-const cellSizeInput = document.getElementById("cellSize");
-const numColorsInput = document.getElementById("numColors");
+function renderRule(ruleNum, initialRow, depth, cellSize, numColors) {
+    setCanvasSize(initialState.length * cellSize, gridHeight * cellSize);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    let row = initialRow;
+    for (let level = 0; level < depth; ++level) {
+        renderRow(row, level, cellSize);
+        let nextRow = FIRST_ITEM; 
+        for (let i = 0; i < row.length - neighbors + 1; ++i) {
+            const pattern = row.slice(i, i + neighbors)
+            nextRow += evaluate(ruleNum, pattern, numColors)
+        }
+        nextRow += LAST_ITEM;
+        row = nextRow
+    }
+}
 
+const form = document.getElementById("form");
 const playButton = document.getElementById("play");
 const pauseButton = document.getElementById("pause");
-const playDelayInput = document.getElementById("playDelay");
+const inputArea = document.getElementById("inputArea");
+const outputArea = document.getElementById("outputArea");
 
+function renderScreen() {
+    renderRule(ruleNumber, initialState, gridHeight, cellSize, numColors);
+}
+
+let playId = null;
 
 pauseButton.addEventListener("click", () => {
-    isPlaying = false;
+    if (playId !== null) {
+        clearInterval(playId);
+        playId = null;
+    }
 })
 
 playButton.addEventListener("click", () => {
-    console.log("clicked play button")
-    isPlaying = true;
+    if (!playId) {
+        playId = setInterval(() => {
+            const parsedJson = getInputs();
+            ruleNumber += 1
+            parsedJson["rule"] = ruleNumber
+            inputArea.value = JSON.stringify(parsedJson, null, 4)
+            renderScreen()
+        }, playDelay)
+    }
 })
+
+let ruleNumber;
+let initialState;
+let gridHeight;
+let cellSize;
+let numColors;
+let playDelay;
+
+function getInputs() {
+    try {
+        const parsedJson = JSON.parse(inputArea.value) 
+        ruleNumber = parseInt(parsedJson["rule"]);
+        initialState = parsedJson["initialState"];
+        gridHeight = parseInt(parsedJson["levels"]);
+        cellSize = parseInt(parsedJson["cellSize"]);
+        numColors = parseInt(parsedJson["numColors"]);
+        playDelay = parseInt(parsedJson["playDelay"]);
+        outputArea.innerHTML = "";
+        return parsedJson;
+    } catch(error) {
+        outputArea.innerHTML = "invalid input";
+    }
+}
 
 
 form.addEventListener("submit", event => {
     // don't refresh the page
     event.preventDefault();
-    console.log("isplaying", isPlaying)
-
-    const ruleNumber = ruleInput.value;
-    const initialState = initialStateInput.value;
-    const gridHeight = gridHeightInput.value;
-    const cellSize = cellSizeInput.value;
-    const numColors = numColorsInput.value;
-    const playDelayParam = playDelayInput.value;
-
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("rule", ruleNumber);
-    searchParams.set("initialState", initialState);
-    searchParams.set("height", gridHeight);
-    searchParams.set("cellSize", cellSize);
-    searchParams.set("numColors", numColors);
-    searchParams.set("isPlaying", isPlaying ? "1" : "0");
-    searchParams.set("playDelay", playDelayParam)
-    window.location.search = searchParams.toString();
+    getInputs()
+    renderScreen()
 })
 
-function updateRule(newRule) {
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("rule", newRule);
-    window.location.search = searchParams.toString();
-}
-
-ruleInput.addEventListener("change", event => {
-    updateRule(event.target.value)
-})
-
-
-const searchParams = new URLSearchParams(window.location.search);
-const ruleNumber = searchParams.get("rule");
-const initialState = searchParams.get("initialState");
-const gridHeight = searchParams.get("height");
-const cellSize = searchParams.get("cellSize");
-const numColors = searchParams.get("numColors");
-const isPlayingParam = searchParams.get("isPlaying");
-const playDelayParam = searchParams.get("playDelay");
-
-if (ruleNumber) {
-    ruleInput.value = ruleNumber;
-}
-
-if (initialState) {
-    initialStateInput.value = initialState;
-}
-
-if (gridHeight) {
-    gridHeightInput.value = gridHeight;
-}
-
-if (cellSize) {
-    cellSizeInput.value = cellSize;
-}
-
-if (numColors) {
-    numColorsInput.value = numColors
-}
-
-if (isPlayingParam) {
-    isPlaying = isPlayingParam === "1" ? true : false
-}
-
-if (playDelayParam) {
-    playDelayInput.value = playDelayParam
-}
-
-if (isPlaying) {
-    setTimeout(() => {
-        if (isPlaying) {
-            updateRule(parseInt(ruleInput.value) + 1)
-        }
-    }, parseInt(playDelayInput.value))
-}
-
-setCanvasSize(initialState.length * parseInt(cellSize), parseInt(gridHeight) * parseInt(cellSize));
-
-const numColorsInputValue = parseInt(numColorsInput.value);
-ruleInput.setAttribute("max", numColorsInputValue ** (numColorsInputValue ** neighbors) - 1)
-
-renderRule(parseInt(ruleNumber), initialState, parseInt(gridHeight), parseInt(cellSize), parseInt(numColors));
+getInputs()
+renderScreen()
