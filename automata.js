@@ -30,10 +30,8 @@ function evaluate(ruleNum, pattern, numColors) {
 
 function renderRow(row, columnNum, cellSize) {
     for(let i = 0; i < row.length; ++i) {
-        if (row[i] !== EMPTY) {
-            ctx.fillStyle = colorChoices[Number(row[i])];
-            ctx.fillRect(cellSize * i, columnNum * cellSize, cellSize, cellSize);
-        }
+        ctx.fillStyle = colorChoices[Number(row[i])];
+        ctx.fillRect(cellSize * i, columnNum * cellSize, cellSize, cellSize);
     }
 }
 
