@@ -7,9 +7,8 @@ const recordingCtx = recording.getContext("2d");
 const neighbors = 3
 const colorChoices = ["white", "black", "grey", "red", "green", "blue"]
 const EMPTY = "0"
-
-const FIRST_ITEM = EMPTY
-const LAST_ITEM = EMPTY
+const left = Math.round((neighbors - 1) / 2)
+const right = Math.round((neighbors - 1) / 2)
 
 rules = new Map();
 
@@ -46,12 +45,17 @@ function renderRule(ruleNum, initialRow, depth, cellSize, numColors) {
     let row = initialRow;
     for (let level = 0; level < depth; ++level) {
         renderRow(row, level, cellSize);
-        let nextRow = FIRST_ITEM; 
-        for (let i = 0; i < row.length - neighbors + 1; ++i) {
-            const pattern = row.slice(i, i + neighbors)
-            nextRow += evaluate(ruleNum, pattern, numColors)
+        let nextRow = "";
+        for (let i = 0; i < row.length; ++i) {
+            const patternStart = i - left + shift;
+            const patternEnd = i + right + shift + 1;
+            if (patternStart >= 0 && patternStart < row.length && patternEnd > 0 && patternEnd <= row.length) {
+                const pattern = row.slice(patternStart, patternEnd)
+                nextRow += evaluate(ruleNum, pattern, numColors)
+            } else {
+                nextRow += EMPTY
+            }
         }
-        nextRow += LAST_ITEM;
         row = nextRow
     }
 }
@@ -105,6 +109,7 @@ let gridHeight;
 let cellSize;
 let numColors;
 let playDelay;
+let shift;
 
 let widthOffset = 0
 let heightOffset = 0
@@ -142,6 +147,8 @@ function getInputs() {
         cellSize = parseInt(parsedJson["cellSize"]);
         numColors = parseInt(parsedJson["numColors"]);
         playDelay = parseInt(parsedJson["playDelay"]);
+        shift = parseInt(parsedJson["shift"]);
+
         outputArea.innerHTML = "";
         return parsedJson;
     } catch(error) {
@@ -158,6 +165,7 @@ form.addEventListener("submit", event => {
 })
 
 getInputs()
+
 renderScreen()
 
 recordingCtx.canvas.width = initialState.length * cellSize * MAX_NUM_RECORDING_COLS;
