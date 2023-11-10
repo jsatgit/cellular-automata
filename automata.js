@@ -47,9 +47,9 @@ function renderRule(ruleNum, initialRow, depth, cellSize, numColors) {
     }
 }
 
-function fitCanvasToWindow() {
-    ctx.canvas.width  = window.innerWidth;
-    ctx.canvas.height = window.innerHeight;
+function setCanvasSize(width, height) {
+    ctx.canvas.width  = width;
+    ctx.canvas.height = height;
 }
 
 const form = document.getElementById("form");
@@ -73,7 +73,6 @@ playButton.addEventListener("click", () => {
     isPlaying = true;
 })
 
-fitCanvasToWindow();
 
 form.addEventListener("submit", event => {
     // don't refresh the page
@@ -154,6 +153,7 @@ if (isPlaying) {
     }, parseInt(playDelayInput.value))
 }
 
+setCanvasSize(initialState.length * parseInt(cellSize), parseInt(gridHeight) * parseInt(cellSize));
 
 const numColorsInputValue = parseInt(numColorsInput.value);
 ruleInput.setAttribute("max", numColorsInputValue ** (numColorsInputValue ** neighbors) - 1)
