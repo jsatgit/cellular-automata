@@ -115,11 +115,12 @@ let widthOffset = 0
 let heightOffset = 0
 let numberOfRecordings = 0
 
-let MAX_NUM_RECORDING_ROWS = 16; 
-let MAX_NUM_RECORDING_COLS = 16; 
+let MAX_NUM_RECORDING_ROWS = 32; 
+let MAX_NUM_RECORDING_COLS = 8; 
 let MAX_NUM_RECORDINGS = MAX_NUM_RECORDING_COLS * MAX_NUM_RECORDING_ROWS 
 
 function record() {
+    recordingCtx.clearRect(widthOffset, heightOffset, recordingCtx.canvas.width / MAX_NUM_RECORDING_COLS, recordingCtx.canvas.height / MAX_NUM_RECORDING_ROWS);
     recordingCtx.drawImage(canvas, widthOffset, heightOffset);
     widthOffset += initialState.length * cellSize
     numberOfRecordings += 1
@@ -129,7 +130,7 @@ function record() {
         heightOffset += gridHeight * cellSize
     }
 
-    if (numberOfRecordings >= MAX_NUM_RECORDINGS) {
+    if (numberOfRecordings % MAX_NUM_RECORDINGS === 0) {
         widthOffset = 0
         heightOffset = 0
     }
